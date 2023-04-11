@@ -30,18 +30,13 @@ Lottie_Coding = load_lottieUrl("https://assets8.lottiefiles.com/packages/lf20_3r
 
 # Header Section
 with st.container():
-    st.subheader("TEAM 3987 :wave:")
-    st.title("Product Review System")
-    st.write("Search For any Product For reviewing")
-
-with st.container():
-    st.write("---")
-    st.title("Project Under Code Unnati Program")
     left_column , right_column = st.columns(2)
     with left_column:
-        st.write("Here we are performing a project in which the user will come on our web app and will enter the url yehn user will get the review of that product")
+        st.subheader("TEAM 3987 :wave:")
+        st.title("Product Review System")
+        st.write("Search For any Product For reviewing")
     with right_column:
-        st_lottie(Lottie_Coding,height=300,key="Coding")
+        st_lottie(Lottie_Coding,height=275,key="Coding")
 
 data = pd.read_csv("data.csv")
 
@@ -76,3 +71,10 @@ with st.container():
             results = search_data(query)
             st.write(f"Found {len(results)} results:")
             st.table(results)
+
+with st.container():
+    st.write("---")
+    st.title("Project Under Code Unnati Program")
+    left_column , right_column = st.columns(2)
+    with left_column:
+        st.write("Here we are performing a project in which the user will come on our web app and will enter the url yehn user will get the review of that product")
