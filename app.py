@@ -49,28 +49,29 @@ def preprocess_text(text):
     topics = [ent.label_ for ent in doc.ents]
     return keywords, topics
         
-def search_data(query):
+def search_data(query, data):
     # Preprocess the query to extract relevant information
     keywords, topics = preprocess_text(query)
     # Search through the data for matches
     matches = []
     for index, row in data.iterrows():
-        text = row["text"]
-        row_keywords, row_topics = preprocess_text(text)
+        name = row["name"] # Fetch the 'name' field
+        review = row["reviews.sourceURLs"] # Fetch the 'review' field
+        row_keywords, row_topics = preprocess_text(review)
         if set(keywords).issubset(row_keywords) or set(topics).issubset(row_topics):
-            matches.append(row)
+            matches.append({'name': name, 'review': review}) # Append the desired fields to the matches list
     return pd.DataFrame(matches)
 
-    
 with st.container():
     st.write("---")
     with st.form('Search'):
         query = st.text_input("Enter Product Name")
         search = st.form_submit_button("Search")
         if search:
-            results = search_data(query)
+            results = search_data(query, data)
             st.write(f"Found {len(results)} results:")
-            st.table(results)
+            filtered_results = results[['name', 'review']]
+            st.table(filtered_results)
 
 with st.container():
     st.write("---")
