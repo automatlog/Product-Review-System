@@ -49,29 +49,50 @@ def preprocess_text(text):
     topics = [ent.label_ for ent in doc.ents]
     return keywords, topics
         
+# def search_data(query, data):
+#     # Preprocess the query to extract relevant information
+#     keywords, topics = preprocess_text(query)
+#     # Search through the data for matches
+#     matches = []
+#     for index, row in data.iterrows():
+#         name = row["name"] # Fetch the 'name' field
+#         review = row["reviews.sourceURLs"] # Fetch the 'review' field
+#         row_keywords, row_topics = preprocess_text(review)
+#         if set(keywords).issubset(row_keywords) or set(topics).issubset(row_topics):
+#             matches.append({'name': name, 'review': review}) # Append the desired fields to the matches list
+#     return pd.DataFrame(matches)
+
 def search_data(query, data):
     # Preprocess the query to extract relevant information
-    keywords, topics = preprocess_text(query)
+    query_keywords, query_topics = preprocess_text(query)
     # Search through the data for matches
     matches = []
     for index, row in data.iterrows():
-        name = row["name"] # Fetch the 'name' field
-        review = row["reviews.sourceURLs"] # Fetch the 'review' field
-        row_keywords, row_topics = preprocess_text(review)
-        if set(keywords).issubset(row_keywords) or set(topics).issubset(row_topics):
-            matches.append({'name': name, 'review': review}) # Append the desired fields to the matches list
+        name = row["name"]
+        review = row["reviews.text"]
+        url = row["reviews.sourceURLs"]
+        # Preprocess the 'name' field and calculate semantic similarity with the query
+        name_keywords, name_topics = preprocess_text(name)
+        name_similarity = nlp(' '.join(name_keywords)).similarity(nlp(' '.join(query_keywords)))
+        # Preprocess the 'review' field and calculate semantic similarity with the query
+        review_keywords, review_topics = preprocess_text(review)
+        review_similarity = nlp(' '.join(review_keywords)).similarity(nlp(' '.join(query_keywords)))
+        # If either the 'name' or 'review' field has high enough semantic similarity with the query, add it to the matches
+        if name_similarity > 0.8 or review_similarity > 0.8:
+            matches.append({'name': name, 'review': review, 'url': url})
     return pd.DataFrame(matches)
 
 with st.container():
     st.write("---")
-    with st.form('Search'):
+    with st.form('Search'): 
         query = st.text_input("Enter Product Name")
         search = st.form_submit_button("Search")
         if search:
             results = search_data(query, data)
             st.write(f"Found {len(results)} results:")
-            filtered_results = results[['name', 'review']]
-            st.table(filtered_results)
+            filtered_results = results[['name', 'review','url']]
+            for i, row in filtered_results.iterrows():
+                st.write(f" {row['name']} <br><br> {row['review']} <br><br> <a href='{row['url']}' target='_blank'>{row['url']}</a> <hr>", unsafe_allow_html=True)
 
 with st.container():
     st.write("---")
